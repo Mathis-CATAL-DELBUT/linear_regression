@@ -1,13 +1,11 @@
-import numpy as np
-
-def entrainer_regression_lineaire(X, y, taux_apprentissage=0.01, epochs=1000):
+def entrainer_regression_lineaire(KM, y, taux_apprentissage=0.01, epochs=1000):
     """
     Entraîne un modèle de régression linéaire.
 
     Arguments :
-        X : numpy.array
+        KM : list
             Les caractéristiques (features) d'entraînement.
-        y : numpy.array
+        y : list
             Les étiquettes (labels) cibles.
         taux_apprentissage : float, optionnel
             Le taux d'apprentissage pour la descente de gradient.
@@ -20,16 +18,16 @@ def entrainer_regression_lineaire(X, y, taux_apprentissage=0.01, epochs=1000):
         theta1 : float
             Le paramètre theta1 (pente) appris.
     """
-    m = len(X)  # Nombre d'exemples dans l'ensemble de données
+    m = len(KM)  # Nombre d'exemples dans l'ensemble de données
     theta0 = 0  # Initialisation de theta0
     theta1 = 0  # Initialisation de theta1
 
     # Entraînement du modèle
     for _ in range(epochs):
-        predictions = theta0 + theta1 * X  # Calcul des prédictions
-        erreur = predictions - y  # Calcul de l'erreur
-        gradient_theta0 = (1 / m) * np.sum(erreur)  # Calcul du gradient pour theta0
-        gradient_theta1 = (1 / m) * np.sum(erreur * X)  # Calcul du gradient pour theta1
+        predictions = [theta0 + theta1 * x for x in KM]  # Calcul des prédictions
+        erreur = [pred - label for pred, label in zip(predictions, y)]  # Calcul de l'erreur
+        gradient_theta0 = (1 / m) * sum(erreur)  # Calcul du gradient pour theta0
+        gradient_theta1 = (1 / m) * sum([err * x for err, x in zip(erreur, KM)])  # Calcul du gradient pour theta1
         theta0 -= taux_apprentissage * gradient_theta0  # Mise à jour de theta0
         theta1 -= taux_apprentissage * gradient_theta1  # Mise à jour de theta1
 
@@ -40,22 +38,26 @@ def normaliser(X):
     Normalise les caractéristiques en soustrayant la moyenne et en divisant par l'écart-type.
 
     Arguments :
-        X : numpy.array
+        X : list
             Les caractéristiques à normaliser.
 
     Returns :
-        X_normalise : numpy.array
+        X_normalise : list
             Les caractéristiques normalisées.
     """
-    return (X - np.mean(X)) / np.std(X)
+    mean_X = sum(X) / len(X)
+    std_dev_X = (sum([(x - mean_X) ** 2 for x in X]) / len(X)) ** 0.5
+    return [(x - mean_X) / std_dev_X for x in X]
 
 def main():
     # Chargement des données
-    data = np.loadtxt("data.csv", delimiter=",", skiprows=1)
+    with open("data.csv", "r") as file:
+        lines = file.readlines()
+        data = [list(map(float, line.strip().split(','))) for line in lines[1:]]
 
     # Séparation des caractéristiques (kilométrage) et des étiquettes (prix)
-    X = data[:, 0]
-    y = data[:, 1]
+    X = [row[0] for row in data]
+    y = [row[1] for row in data]
 
     # Normalisation des caractéristiques
     X_normalise = normaliser(X)
@@ -68,7 +70,8 @@ def main():
     print("theta1:", theta1)
 
     # Sauvegarde des paramètres dans un fichier pour une utilisation future
-    np.savetxt("parameters.txt", [theta0, theta1])
+    with open("parameters.txt", "w") as file:
+        file.write(f"{theta0}\n{theta1}")
 
     # Utilisation du modèle entraîné pour prédire le prix pour un kilométrage donné
     while True:
@@ -79,7 +82,9 @@ def main():
             print("Veuillez entrer une valeur numérique valide.")
 
     # Normalisation du kilométrage avant la prédiction
-    kilométrage_normalisé = (kilométrage - np.mean(X)) / np.std(X)
+    mean_X = sum(X) / len(X)
+    std_dev_X = (sum([(x - mean_X) ** 2 for x in X]) / len(X)) ** 0.5
+    kilométrage_normalisé = (kilométrage - mean_X) / std_dev_X
     prix_estimé = theta0 + theta1 * kilométrage_normalisé
     print("Prix estimé:", prix_estimé)
 

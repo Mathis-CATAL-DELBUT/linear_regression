@@ -3,27 +3,46 @@ import numpy as np ####################### !!!!!!!!!!!!!!!! A ENLEVER !!!!!!!!!!
 
 def estimate_price_menu(theta0, theta1):
     try:
+        data_mileage = []
+        data_price = []
+
+        with open('data.csv', newline='') as data_file:
+            reader = csv.reader(data_file)
+            next(reader) 
+            for row in reader:
+                data_mileage.append(int(row[0]))
+                data_price.append(int(row[1]))
+
         mileage = int(input("Enter the mileage: "))
-        print("\nThe estimated price is: ", estimate_price(theta0, theta1, mileage))
+
+        moyenne_mileage = sum(data_mileage) / len(data_mileage)
+        ecart_type_mileage = (sum([(x - moyenne_mileage) ** 2 for x in data_mileage]) / len(data_mileage)) ** 0.5
+        kilométrage_normalisé = (mileage - moyenne_mileage) / ecart_type_mileage
+        
+        print("\nThe estimated price is: ", estimate_price(theta0, theta1, kilométrage_normalisé))
     except:
         print("\nInvalid number")
         estimate_price_menu(theta0, theta1) 
 
 def estimate_price(theta0, theta1, mileage):
-    return round(theta0 + (theta1 * mileage), 2)
+    return theta0 + (theta1 * mileage)
 
-def normalise(data):
-    mean = sum(data) / len(data)
-    dif_edge = []
-    for value in data:
-        dif_edge.append((value - mean) ** 2)
-    mean_dif_edge = sum(dif_edge) / len(dif_edge)
-    ecart_type = np.sqrt(mean_dif_edge)
+def normalise(X):
+    moyenne_X = sum(X) / len(X)
+    ecart_type_X = (sum([(x - moyenne_X) ** 2 for x in X]) / len(X)) ** 0.5
+    return [(x - moyenne_X) / ecart_type_X for x in X]
 
-    for i in range(len(data)):
-        data[i] = (data[i] - mean) / ecart_type
+    # mean = sum(data) / len(data)
+    # dif_edge = []
+    # for value in data:
+    #     dif_edge.append((value - mean) ** 2)
+    # mean_dif_edge = sum(dif_edge) / len(dif_edge)
+    # ecart_type = np.sqrt(mean_dif_edge)
+
+    # for i in range(len(data)):
+    #     data[i] = (data[i] - mean) / ecart_type
     
-    return data
+    # return data
 
 def learn(theta0, theta1, learning_rate):
 
@@ -42,7 +61,7 @@ def learn(theta0, theta1, learning_rate):
 
     data_mileage = normalise(data_mileage)
 
-    while (learn_again < 10):
+    while (learn_again < 10000):
 
         sumT0 = 0
         sumT1 = 0
@@ -58,8 +77,8 @@ def learn(theta0, theta1, learning_rate):
         tmp0 = tmp0 - learning_rate * d0
         tmp1 = tmp1 - learning_rate * d1
 
-        print("tmp0 : ", tmp0)
-        print("tmp1 : ", tmp1)
+        # print("tmp0 : ", tmp0)
+        # print("tmp1 : ", tmp1)
             
         learn_again += 1
 

@@ -45,9 +45,9 @@ def normaliser(X):
         X_normalise : list
             Les caractéristiques normalisées.
     """
-    mean_X = sum(X) / len(X)
-    std_dev_X = (sum([(x - mean_X) ** 2 for x in X]) / len(X)) ** 0.5
-    return [(x - mean_X) / std_dev_X for x in X]
+    moyenne_X = sum(X) / len(X)
+    ecart_type_X = (sum([(x - moyenne_X) ** 2 for x in X]) / len(X)) ** 0.5
+    return [(x - moyenne_X) / ecart_type_X for x in X]
 
 def main():
     # Chargement des données
@@ -82,9 +82,9 @@ def main():
             print("Veuillez entrer une valeur numérique valide.")
 
     # Normalisation du kilométrage avant la prédiction
-    mean_X = sum(X) / len(X)
-    std_dev_X = (sum([(x - mean_X) ** 2 for x in X]) / len(X)) ** 0.5
-    kilométrage_normalisé = (kilométrage - mean_X) / std_dev_X
+    moyenne_X = sum(X) / len(X)
+    ecart_type_X = (sum([(x - moyenne_X) ** 2 for x in X]) / len(X)) ** 0.5
+    kilométrage_normalisé = (kilométrage - moyenne_X) / ecart_type_X
     prix_estimé = theta0 + theta1 * kilométrage_normalisé
     print("Prix estimé:", prix_estimé)
 

@@ -1,7 +1,7 @@
 import csv
 import numpy as np ####################### !!!!!!!!!!!!!!!! A ENLEVER !!!!!!!!!!!!!!!! #######################
 
-def estimate_price_menu(theta0, theta1):
+def estimate_price_menu(theta0, theta1, data_mileage_2):
     try:
         data_mileage = []
         data_price = []
@@ -27,39 +27,26 @@ def estimate_price_menu(theta0, theta1):
 def estimate_price(theta0, theta1, mileage):
     return theta0 + (theta1 * mileage)
 
-def normalise(X):
-    moyenne_X = sum(X) / len(X)
-    ecart_type_X = (sum([(x - moyenne_X) ** 2 for x in X]) / len(X)) ** 0.5
-    return [(x - moyenne_X) / ecart_type_X for x in X]
+def normalise(data):
+    mean = sum(data) / len(data)
+    dif_edge = []
+    for value in data:
+        dif_edge.append((value - mean) ** 2)
+    mean_dif_edge = sum(dif_edge) / len(dif_edge)
+    ecart_type = np.sqrt(mean_dif_edge)
 
-    # mean = sum(data) / len(data)
-    # dif_edge = []
-    # for value in data:
-    #     dif_edge.append((value - mean) ** 2)
-    # mean_dif_edge = sum(dif_edge) / len(dif_edge)
-    # ecart_type = np.sqrt(mean_dif_edge)
-
-    # for i in range(len(data)):
-    #     data[i] = (data[i] - mean) / ecart_type
+    for i in range(len(data)):
+        data[i] = (data[i] - mean) / ecart_type
     
-    # return data
+    return data
 
-def learn(theta0, theta1, learning_rate):
+def learn(theta0, theta1, learning_rate, data_mileage, data_price):
 
-    data_mileage = []
-    data_price = []
     tmp0 = theta0
     tmp1 = theta1
     learn_again = 1
 
-    with open('data.csv', newline='') as data_file:
-        reader = csv.reader(data_file)
-        next(reader) 
-        for row in reader:
-            data_mileage.append(int(row[0]))
-            data_price.append(int(row[1]))
-
-    data_mileage = normalise(data_mileage)
+    data_mileage_normalise = normalise(data_mileage)
 
     while (learn_again < 10000):
 
@@ -68,17 +55,14 @@ def learn(theta0, theta1, learning_rate):
         m = len(data_mileage)
 
         for i in range(m):
-            sumT0 += (estimate_price(tmp0, tmp1, data_mileage[i]) - data_price[i])
-            sumT1 += (estimate_price(tmp0, tmp1, data_mileage[i]) - data_price[i]) * data_mileage[i]
+            sumT0 += (estimate_price(tmp0, tmp1, data_mileage_normalise[i]) - data_price[i])
+            sumT1 += (estimate_price(tmp0, tmp1, data_mileage_normalise[i]) - data_price[i]) * data_mileage_normalise[i]
 
         d0 = (1 / m) * sumT0
         d1 = (1 / m) * sumT1
 
         tmp0 = tmp0 - learning_rate * d0
         tmp1 = tmp1 - learning_rate * d1
-
-        # print("tmp0 : ", tmp0)
-        # print("tmp1 : ", tmp1)
             
         learn_again += 1
 
@@ -89,6 +73,16 @@ def main():
     theta0 = 0
     theta1 = 0
     learning_rate = 0.001
+    data_mileage = []
+    data_price = []
+
+    with open('data.csv', newline='') as data_file:
+        reader = csv.reader(data_file)
+        next(reader) 
+        for row in reader:
+            data_mileage.append(int(row[0]))
+            data_price.append(int(row[1]))
+
     while True:
         print("\n============= MENU =============\n")
         print("1 : Estimate Price")
@@ -100,9 +94,9 @@ def main():
         try:
             nb = int(input("Enter a number: "))
             if nb == 1:
-                estimate_price_menu(theta0, theta1)
+                estimate_price_menu(theta0, theta1, data_mileage)
             elif nb == 2:
-                theta0, theta1 = learn(theta0, theta1, learning_rate)
+                theta0, theta1 = learn(theta0, theta1, learning_rate, data_mileage, data_price)
                 print("\nTheta values updated")
                 print("Theta0: ", theta0)
                 print("Theta1: ", theta1)

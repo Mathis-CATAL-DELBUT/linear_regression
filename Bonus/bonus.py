@@ -1,25 +1,25 @@
 import csv
-import numpy as np ####################### !!!!!!!!!!!!!!!! A ENLEVER !!!!!!!!!!!!!!!! #######################
 
-def estimate_price_menu(theta0, theta1, data_mileage_2):
+def estimate_price_menu(theta0, theta1):
     try:
         data_mileage = []
-        data_price = []
 
         with open('data.csv', newline='') as data_file:
             reader = csv.reader(data_file)
             next(reader) 
             for row in reader:
                 data_mileage.append(int(row[0]))
-                data_price.append(int(row[1]))
 
         mileage = int(input("Enter the mileage: "))
 
         moyenne_mileage = sum(data_mileage) / len(data_mileage)
-        ecart_type_mileage = (sum([(x - moyenne_mileage) ** 2 for x in data_mileage]) / len(data_mileage)) ** 0.5
-        kilométrage_normalisé = (mileage - moyenne_mileage) / ecart_type_mileage
-        
-        print("\nThe estimated price is: ", estimate_price(theta0, theta1, kilométrage_normalisé))
+        ecart_type_mileage = 0
+        for value in data_mileage:
+            ecart_type_mileage += (value - moyenne_mileage) ** 2
+        ecart_type_mileage = (ecart_type_mileage / len(data_mileage)) ** 0.5
+        mileage_normalise = (mileage - moyenne_mileage) / ecart_type_mileage
+        print("\nThe estimated price is: ", estimate_price(theta0, theta1, mileage_normalise))
+
     except:
         print("\nInvalid number")
         estimate_price_menu(theta0, theta1) 
@@ -29,16 +29,21 @@ def estimate_price(theta0, theta1, mileage):
 
 def normalise(data):
     mean = sum(data) / len(data)
-    dif_edge = []
+    # la somme des carrés des différences par rapport à la moyenne
+    sum_squares_diff = 0
     for value in data:
-        dif_edge.append((value - mean) ** 2)
-    mean_dif_edge = sum(dif_edge) / len(dif_edge)
-    ecart_type = np.sqrt(mean_dif_edge)
+        sum_squares_diff += (value - mean) ** 2
 
-    for i in range(len(data)):
-        data[i] = (data[i] - mean) / ecart_type
-    
-    return data
+    # écart-type
+    standard_deviation = (sum_squares_diff / len(data)) ** 0.5
+
+    # Normalisation 
+    normalised_data = []
+    for value in data:
+        normalised_data.append((value - mean) / standard_deviation)
+
+    return normalised_data
+
 
 def learn(theta0, theta1, learning_rate, data_mileage, data_price):
 
@@ -94,12 +99,10 @@ def main():
         try:
             nb = int(input("Enter a number: "))
             if nb == 1:
-                estimate_price_menu(theta0, theta1, data_mileage)
+                estimate_price_menu(theta0, theta1)
             elif nb == 2:
                 theta0, theta1 = learn(theta0, theta1, learning_rate, data_mileage, data_price)
                 print("\nTheta values updated")
-                print("Theta0: ", theta0)
-                print("Theta1: ", theta1)
             elif nb == 3:
                 learning_rate = float(input("\nEnter the learning rate: "))
             elif nb == 4:
@@ -110,7 +113,6 @@ def main():
                 theta1 = 0
                 print("\nTheta values reset")
             elif nb == 6:
-                print("Exit")
                 break
             else:
                 print("\nInvalid number")

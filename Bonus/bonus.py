@@ -1,5 +1,7 @@
 import csv
 import os
+import matplotlib.pyplot as plt
+from colorama import init, Fore
 
 def clear_terminal():
     os.system('clear')
@@ -25,7 +27,7 @@ def estimate_price_menu(theta0, theta1):
         print("\nThe estimated price is: ", round(estimate_price(theta0, theta1, mileage_normalise), 2), " $")
 
     except:
-        print("\nInvalid number")
+        print("\nInvalid number 🚫")
         estimate_price_menu(theta0, theta1) 
 
 def estimate_price(theta0, theta1, mileage):
@@ -77,6 +79,45 @@ def learn(theta0, theta1, learning_rate, data_mileage, data_price):
 
     return tmp0, tmp1
 
+def precision(theta0, theta1, data_mileage, data_price):
+    moyenne_mileage = sum(data_mileage) / len(data_mileage)
+    ecart_type_mileage = 0
+    for value in data_mileage:
+        ecart_type_mileage += (value - moyenne_mileage) ** 2
+    ecart_type_mileage = (ecart_type_mileage / len(data_mileage)) ** 0.5
+    print("\n*****************************************************************************")
+    print("*                   Precision of the model:                                 *")
+    print("*****************************************************************************\n")
+    sum_diff = 0
+    for i in range(len(data_mileage)):
+        mileage_normalise = (data_mileage[i] - moyenne_mileage) / ecart_type_mileage
+        estimate = estimate_price(theta0, theta1, mileage_normalise)
+        diff = abs(round(estimate * 100 / data_price[i] - 100, 2))
+        sum_diff += diff
+        print("Real price: ", data_price[i], " | Estimated price: ", round(estimate, 1), " | Difference: ", diff , " %")
+    
+    print("\nAverage difference: ", Fore.GREEN, round(sum_diff / len(data_mileage), 2), " %", Fore.RESET)
+
+def print_graph(theta0, theta1, data_mileage, data_price):
+    plt.scatter(data_mileage, data_price)
+
+    moyenne_mileage = sum(data_mileage) / len(data_mileage)
+    ecart_type_mileage = 0
+    for value in data_mileage:
+        ecart_type_mileage += (value - moyenne_mileage) ** 2
+    ecart_type_mileage = (ecart_type_mileage / len(data_mileage)) ** 0.5
+
+    predictions = []
+    for i in range(len(data_mileage)):
+        mileage_normalise = (data_mileage[i] - moyenne_mileage) / ecart_type_mileage
+        predictions.append(estimate_price(theta0, theta1, mileage_normalise))
+    plt.plot(data_mileage, predictions, color='red', label='Linear Regression')
+    plt.title('Linear Regression : Mileage vs Price')
+    plt.xlabel('Mileage')
+    plt.ylabel('Price')
+
+    plt.show()  
+
 
 def main():
     theta0 = 0
@@ -84,6 +125,8 @@ def main():
     learning_rate = 0.001
     data_mileage = []
     data_price = []
+
+    init()
 
     with open('data.csv', newline='') as data_file:
         reader = csv.reader(data_file)
@@ -99,7 +142,9 @@ def main():
         print("3 : Change learning rate 📚")
         print("4 : Display theta values 🖋️")
         print("5 : Reset theta values 🔄")
-        print("6 : Exit 🚪\n")
+        print("6 : Precision 🎯")
+        print("7 : Graph 📈")
+        print("8 : Exit 🚪\n")
         try:
             nb = int(input("Enter a number: "))
             clear_terminal()
@@ -120,15 +165,20 @@ def main():
             elif nb == 5:
                 theta0 = 0
                 theta1 = 0
-                print("\nTheta values reset")
+                print("\nTheta values reset ✅")
             elif nb == 6:
+                precision(theta0, theta1, data_mileage, data_price)
+            elif nb == 7:
+                print_graph(theta0, theta1, data_mileage, data_price)
+            elif nb == 8:
                 break
             else:
-                print("\nInvalid number")
+                print("\nInvalid number 🚫")
                 continue
             input("\nPress Enter to continue...")
+            clear_terminal()
         except:
-            print("\nInvalid number")
+            print("\nInvalid number 🚫")
             continue
     print("\nBye 👋")
 

@@ -3,35 +3,31 @@ import os
 import matplotlib.pyplot as plt
 from colorama import init, Fore
 
+##### ESSAYER D"AVOIR UNE FONCTION QUI NORMALISE LES DONNEES #####
+
 def clear_terminal():
     os.system('clear')
 
-def estimate_price_menu(theta0, theta1):
-    try:
-        data_mileage = []
+def scrap_data():
+    data_mileage = []
+    data_price = []
 
-        with open('data.csv', newline='') as data_file:
-            reader = csv.reader(data_file)
-            next(reader) 
-            for row in reader:
-                data_mileage.append(int(row[0]))
+    with open('data.csv', newline='') as data_file:
+        reader = csv.reader(data_file)
+        next(reader) 
+        for row in reader:
+            data_mileage.append(int(row[0]))
+            data_price.append(int(row[1]))
+    
+    return data_mileage, data_price
 
-        mileage = int(input("Enter the mileage: "))
-
-        moyenne_mileage = sum(data_mileage) / len(data_mileage)
-        ecart_type_mileage = 0
-        for value in data_mileage:
-            ecart_type_mileage += (value - moyenne_mileage) ** 2
-        ecart_type_mileage = (ecart_type_mileage / len(data_mileage)) ** 0.5
-        mileage_normalise = (mileage - moyenne_mileage) / ecart_type_mileage
-        print("\nThe estimated price is: ", round(estimate_price(theta0, theta1, mileage_normalise), 2), " $")
-
-    except:
-        print("\nInvalid number 🚫")
-        estimate_price_menu(theta0, theta1) 
-
-def estimate_price(theta0, theta1, mileage):
-    return theta0 + (theta1 * mileage)
+def normalise_mileage(data_mileage, mileage):
+    average_mileage = sum(data_mileage) / len(data_mileage)
+    standard_deviation_mileage = 0
+    for value in data_mileage:
+        standard_deviation_mileage += (value - average_mileage) ** 2
+    standard_deviation_mileage = (standard_deviation_mileage / len(data_mileage)) ** 0.5
+    return (mileage - average_mileage) / standard_deviation_mileage
 
 def normalise(data):
     mean = sum(data) / len(data)
@@ -50,6 +46,21 @@ def normalise(data):
 
     return normalised_data
 
+
+def estimate_price_menu(theta0, theta1):
+    try:
+        if theta0 == 0 or theta1 == 0:
+            print("\n⚠️ The program has not yet learned ⚠️\n")
+        data_mileage = scrap_data()[0]
+        mileage = int(input("Enter the mileage: "))
+        print("\nThe estimated price is: ", round(estimate_price(theta0, theta1, normalise_mileage(data_mileage, mileage)), 2), " $")
+
+    except:
+        print("\nInvalid number 🚫")
+        estimate_price_menu(theta0, theta1) 
+
+def estimate_price(theta0, theta1, mileage):
+    return theta0 + (theta1 * mileage)
 
 def learn(theta0, theta1, learning_rate, data_mileage, data_price):
 
@@ -80,18 +91,12 @@ def learn(theta0, theta1, learning_rate, data_mileage, data_price):
     return tmp0, tmp1
 
 def precision(theta0, theta1, data_mileage, data_price):
-    moyenne_mileage = sum(data_mileage) / len(data_mileage)
-    ecart_type_mileage = 0
-    for value in data_mileage:
-        ecart_type_mileage += (value - moyenne_mileage) ** 2
-    ecart_type_mileage = (ecart_type_mileage / len(data_mileage)) ** 0.5
     print("\n*****************************************************************************")
     print("*                   Precision of the model:                                 *")
     print("*****************************************************************************\n")
     sum_diff = 0
     for i in range(len(data_mileage)):
-        mileage_normalise = (data_mileage[i] - moyenne_mileage) / ecart_type_mileage
-        estimate = estimate_price(theta0, theta1, mileage_normalise)
+        estimate = estimate_price(theta0, theta1, normalise_mileage(data_mileage, data_mileage[i]))
         diff = abs(round(estimate * 100 / data_price[i] - 100, 2))
         sum_diff += diff
         print("Real price: ", data_price[i], " | Estimated price: ", round(estimate, 1), " | Difference: ", diff , " %")
@@ -101,16 +106,9 @@ def precision(theta0, theta1, data_mileage, data_price):
 def print_graph(theta0, theta1, data_mileage, data_price):
     plt.scatter(data_mileage, data_price)
 
-    moyenne_mileage = sum(data_mileage) / len(data_mileage)
-    ecart_type_mileage = 0
-    for value in data_mileage:
-        ecart_type_mileage += (value - moyenne_mileage) ** 2
-    ecart_type_mileage = (ecart_type_mileage / len(data_mileage)) ** 0.5
-
     predictions = []
     for i in range(len(data_mileage)):
-        mileage_normalise = (data_mileage[i] - moyenne_mileage) / ecart_type_mileage
-        predictions.append(estimate_price(theta0, theta1, mileage_normalise))
+        predictions.append(estimate_price(theta0, theta1, normalise_mileage(data_mileage, data_mileage[i])))
     plt.plot(data_mileage, predictions, color='red', label='Linear Regression')
     plt.title('Linear Regression : Mileage vs Price')
     plt.xlabel('Mileage')
@@ -123,17 +121,9 @@ def main():
     theta0 = 0
     theta1 = 0
     learning_rate = 0.001
-    data_mileage = []
-    data_price = []
+    data_mileage, data_price = scrap_data()
 
     init()
-
-    with open('data.csv', newline='') as data_file:
-        reader = csv.reader(data_file)
-        next(reader) 
-        for row in reader:
-            data_mileage.append(int(row[0]))
-            data_price.append(int(row[1]))
 
     while True:
         print("\n============= MENU =============\n")

@@ -1,4 +1,8 @@
 import csv
+import os
+
+def clear_terminal():
+    os.system('clear')
 
 def estimate_price_menu(theta0, theta1):
     try:
@@ -18,7 +22,7 @@ def estimate_price_menu(theta0, theta1):
             ecart_type_mileage += (value - moyenne_mileage) ** 2
         ecart_type_mileage = (ecart_type_mileage / len(data_mileage)) ** 0.5
         mileage_normalise = (mileage - moyenne_mileage) / ecart_type_mileage
-        print("\nThe estimated price is: ", estimate_price(theta0, theta1, mileage_normalise))
+        print("\nThe estimated price is: ", round(estimate_price(theta0, theta1, mileage_normalise), 2), " $")
 
     except:
         print("\nInvalid number")
@@ -90,21 +94,26 @@ def main():
 
     while True:
         print("\n============= MENU =============\n")
-        print("1 : Estimate Price")
-        print("2 : Learn")
-        print("3 : Change learning rate")
-        print("4 : Display theta values")
-        print("5 : Reset theta values")
-        print("6 : Exit\n")
+        print("1 : Estimate Price 💲")
+        print("2 : Learn 🧠")
+        print("3 : Change learning rate 📚")
+        print("4 : Display theta values 🖋️")
+        print("5 : Reset theta values 🔄")
+        print("6 : Exit 🚪\n")
         try:
             nb = int(input("Enter a number: "))
+            clear_terminal()
             if nb == 1:
                 estimate_price_menu(theta0, theta1)
             elif nb == 2:
                 theta0, theta1 = learn(theta0, theta1, learning_rate, data_mileage, data_price)
-                print("\nTheta values updated")
+                print("\nTheta values updated successfully ✅")
             elif nb == 3:
                 learning_rate = float(input("\nEnter the learning rate: "))
+                while (learning_rate <= 0 or learning_rate >= 1):
+                    if learning_rate <= 0 or learning_rate >= 1:
+                        print("\n⚠️ The learning rate must be between 0 and 1 ⚠️")
+                    learning_rate = float(input("\nEnter the learning rate: "))
             elif nb == 4:
                 print("\nTheta0: ", theta0)
                 print("Theta1: ", theta1)
@@ -117,9 +126,10 @@ def main():
             else:
                 print("\nInvalid number")
                 continue
+            input("\nPress Enter to continue...")
         except:
             print("\nInvalid number")
             continue
-    print("\nEnd of the program")
+    print("\nBye 👋")
 
 main()

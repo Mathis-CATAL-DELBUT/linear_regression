@@ -47,11 +47,10 @@ def normalise(data):
     return normalised_data
 
 
-def estimate_price_menu(theta0, theta1):
+def estimate_price_menu(theta0, theta1, data_mileage):
     try:
         if theta0 == 0 or theta1 == 0:
             print("\n⚠️ The program has not yet learned ⚠️\n")
-        data_mileage = scrap_data()[0]
         mileage = int(input("Enter the mileage: "))
         print("\nThe estimated price is: ", round(estimate_price(theta0, theta1, normalise_mileage(data_mileage, mileage)), 2), " $")
 
@@ -68,7 +67,9 @@ def learn(theta0, theta1, learning_rate, data_mileage, data_price):
     tmp1 = theta1
     learn_again = 1
 
-    data_mileage_normalise = normalise(data_mileage)
+    data_mileage_normalise = []
+    for i in range(len(data_mileage)):
+        data_mileage_normalise.append(normalise_mileage(data_mileage, data_mileage[i]))
 
     while (learn_again < 10000):
 
@@ -139,7 +140,7 @@ def main():
             nb = int(input("Enter a number: "))
             clear_terminal()
             if nb == 1:
-                estimate_price_menu(theta0, theta1)
+                estimate_price_menu(theta0, theta1, data_mileage)
             elif nb == 2:
                 theta0, theta1 = learn(theta0, theta1, learning_rate, data_mileage, data_price)
                 print("\nTheta values updated successfully ✅")

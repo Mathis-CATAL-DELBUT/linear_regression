@@ -3,33 +3,27 @@ import csv
 def estimate_price(theta0, theta1, mileage):
     return theta0 + (theta1 * mileage)
 
-def normalise(data):
-    mean = sum(data) / len(data)
-    # la somme des carrés des différences par rapport à la moyenne
-    sum_squares_diff = 0
-    for value in data:
-        sum_squares_diff += (value - mean) ** 2
-
-    # écart-type
-    standard_deviation = (sum_squares_diff / len(data)) ** 0.5
-
-    # Normalisation 
-    normalised_data = []
-    for value in data:
-        normalised_data.append((value - mean) / standard_deviation)
-
-    return normalised_data
+def normalise_mileage(data_mileage, mileage):
+    average_mileage = sum(data_mileage) / len(data_mileage)
+    standard_deviation_mileage = 0
+    for value in data_mileage:
+        standard_deviation_mileage += (value - average_mileage) ** 2
+    standard_deviation_mileage = (standard_deviation_mileage / len(data_mileage)) ** 0.5
+    return (mileage - average_mileage) / standard_deviation_mileage
 
 
 def learn(theta0, theta1, learning_rate, data_mileage, data_price):
 
-    tmp0 = theta0
-    tmp1 = theta1
     learn_again = 1
 
-    data_mileage_normalise = normalise(data_mileage)
+    data_mileage_normalise = []
+    for i in range(len(data_mileage)):
+        data_mileage_normalise.append(normalise_mileage(data_mileage, data_mileage[i]))
 
     while (learn_again < 10000):
+
+        tmp0 = theta0
+        tmp1 = theta1
 
         sumT0 = 0
         sumT1 = 0
@@ -42,12 +36,12 @@ def learn(theta0, theta1, learning_rate, data_mileage, data_price):
         d0 = (1 / m) * sumT0
         d1 = (1 / m) * sumT1
 
-        tmp0 = tmp0 - learning_rate * d0
-        tmp1 = tmp1 - learning_rate * d1
+        theta0 = tmp0 - learning_rate * d0
+        theta1 = tmp1 - learning_rate * d1
             
         learn_again += 1
 
-    return tmp0, tmp1
+    return theta0, theta1
 
 def main():
     theta0 = 0

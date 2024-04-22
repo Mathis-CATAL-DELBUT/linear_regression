@@ -1,5 +1,13 @@
 import csv
 
+def normalise_mileage(data_mileage, mileage):
+    average_mileage = sum(data_mileage) / len(data_mileage)
+    standard_deviation_mileage = 0
+    for value in data_mileage:
+        standard_deviation_mileage += (value - average_mileage) ** 2
+    standard_deviation_mileage = (standard_deviation_mileage / len(data_mileage)) ** 0.5
+    return (mileage - average_mileage) / standard_deviation_mileage
+
 def estimate_price():
     try:
         data_mileage = []
@@ -22,13 +30,7 @@ def estimate_price():
 
         mileage = int(input("Enter the mileage: "))
 
-        moyenne_mileage = sum(data_mileage) / len(data_mileage)
-        ecart_type_mileage = 0
-        for value in data_mileage:
-            ecart_type_mileage += (value - moyenne_mileage) ** 2
-        ecart_type_mileage = (ecart_type_mileage / len(data_mileage)) ** 0.5
-        mileage_normalise = (mileage - moyenne_mileage) / ecart_type_mileage
-        print("\nThe estimated price is: ", theta0 + (theta1 * mileage_normalise))
+        print("\nThe estimated price is: ", theta0 + (theta1 * normalise_mileage(data_mileage, mileage)), " $")
 
     except:
         print("\nInvalid number")

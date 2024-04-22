@@ -3,8 +3,6 @@ import os
 import matplotlib.pyplot as plt
 from colorama import init, Fore
 
-##### ESSAYER D"AVOIR UNE FONCTION QUI NORMALISE LES DONNEES #####
-
 def clear_terminal():
     os.system('clear')
 

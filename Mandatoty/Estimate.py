@@ -25,6 +25,7 @@ def estimate_price():
                 theta0 = float(first_row[0])
                 theta1 = float(first_row[1])
         except:
+            print("\n⚠️ The program has not yet learned ⚠️\n")
             theta0 = 0
             theta1 = 0
 

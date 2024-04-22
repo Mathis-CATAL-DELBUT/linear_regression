@@ -29,23 +29,6 @@ def normalise_mileage(data_mileage, mileage):
     standard_deviation_mileage = (standard_deviation_mileage / len(data_mileage)) ** 0.5
     return (mileage - average_mileage) / standard_deviation_mileage
 
-def normalise(data):
-    mean = sum(data) / len(data)
-    # la somme des carrés des différences par rapport à la moyenne
-    sum_squares_diff = 0
-    for value in data:
-        sum_squares_diff += (value - mean) ** 2
-
-    # écart-type
-    standard_deviation = (sum_squares_diff / len(data)) ** 0.5
-
-    # Normalisation 
-    normalised_data = []
-    for value in data:
-        normalised_data.append((value - mean) / standard_deviation)
-
-    return normalised_data
-
 
 def estimate_price_menu(theta0, theta1, data_mileage):
     try:
@@ -114,7 +97,6 @@ def print_graph(theta0, theta1, data_mileage, data_price):
     plt.title('Linear Regression : Mileage vs Price')
     plt.xlabel('Mileage')
     plt.ylabel('Price')
-
     plt.show()  
 
 

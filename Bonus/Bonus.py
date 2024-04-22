@@ -42,17 +42,17 @@ def estimate_price_menu(theta0, theta1, data_mileage):
 def estimate_price(theta0, theta1, mileage):
     return theta0 + (theta1 * mileage)
 
-def learn(theta0, theta1, learning_rate, data_mileage, data_price):
+def learn(theta0, theta1, learning_rate, data_mileage, data_price, learning_count):
 
-    tmp0 = theta0
-    tmp1 = theta1
     learn_again = 1
 
     data_mileage_normalise = []
     for i in range(len(data_mileage)):
         data_mileage_normalise.append(normalise_mileage(data_mileage, data_mileage[i]))
 
-    while (learn_again < 10000):
+    while (learn_again < learning_count):
+        tmp0 = theta0
+        tmp1 = theta1
 
         sumT0 = 0
         sumT1 = 0
@@ -65,12 +65,12 @@ def learn(theta0, theta1, learning_rate, data_mileage, data_price):
         d0 = (1 / m) * sumT0
         d1 = (1 / m) * sumT1
 
-        tmp0 = tmp0 - learning_rate * d0
-        tmp1 = tmp1 - learning_rate * d1
+        theta0 = tmp0 - learning_rate * d0
+        theta1 = tmp1 - learning_rate * d1
             
         learn_again += 1
 
-    return tmp0, tmp1
+    return theta0, theta1
 
 def precision(theta0, theta1, data_mileage, data_price):
     print("\n*****************************************************************************")
@@ -85,13 +85,14 @@ def precision(theta0, theta1, data_mileage, data_price):
     
     print("\nAverage difference: ", Fore.GREEN, round(sum_diff / len(data_mileage), 2), " %", Fore.RESET)
 
-def print_graph(theta0, theta1, data_mileage, data_price):
+def print_graph(theta0, theta1, data_mileage, data_price, linear_regression):
     plt.scatter(data_mileage, data_price)
 
     predictions = []
     for i in range(len(data_mileage)):
         predictions.append(estimate_price(theta0, theta1, normalise_mileage(data_mileage, data_mileage[i])))
-    plt.plot(data_mileage, predictions, color='red', label='Linear Regression')
+    if linear_regression == True:
+        plt.plot(data_mileage, predictions, color='red', label='Linear Regression')
     plt.title('Linear Regression : Mileage vs Price')
     plt.xlabel('Mileage')
     plt.ylabel('Price')
@@ -102,6 +103,7 @@ def main():
     theta0 = 0
     theta1 = 0
     learning_rate = 0.001
+    learning_count = 10000
     data_mileage, data_price = scrap_data()
 
     init()
@@ -111,18 +113,20 @@ def main():
         print("1 : Estimate Price 💲")
         print("2 : Learn 🧠")
         print("3 : Change learning rate 📚")
-        print("4 : Display theta values 🖋️")
-        print("5 : Reset theta values 🔄")
-        print("6 : Precision 🎯")
-        print("7 : Graph 📈")
-        print("8 : Exit 🚪\n")
+        print("4 : Change learning count 📊")
+        print("5 : Display theta values 🖋️")
+        print("6 : Reset theta values 🔄")
+        print("7 : Precision 🎯")
+        print("8 : Graph without linear regression 📈")
+        print("9 : Graph with linear regression 📉")
+        print("10 : Exit 🚪\n")
         try:
             nb = int(input("Enter a number: "))
             clear_terminal()
             if nb == 1:
                 estimate_price_menu(theta0, theta1, data_mileage)
             elif nb == 2:
-                theta0, theta1 = learn(theta0, theta1, learning_rate, data_mileage, data_price)
+                theta0, theta1 = learn(theta0, theta1, learning_rate, data_mileage, data_price, learning_count)
                 print("\nTheta values updated successfully ✅")
             elif nb == 3:
                 learning_rate = float(input("\nEnter the learning rate: "))
@@ -131,17 +135,24 @@ def main():
                         print("\n⚠️ The learning rate must be between 0 and 1 ⚠️")
                     learning_rate = float(input("\nEnter the learning rate: "))
             elif nb == 4:
+                learning_count = int(input("\nEnter the learning count: "))
+                while (learning_count <= 0):
+                    print("\n⚠️ The learning count must be greater than 0 ⚠️")
+                    learning_count = int(input("\nEnter the learning count: "))
+            elif nb == 5:
                 print("\nTheta0: ", theta0)
                 print("Theta1: ", theta1)
-            elif nb == 5:
+            elif nb == 6:
                 theta0 = 0
                 theta1 = 0
                 print("\nTheta values reset ✅")
-            elif nb == 6:
-                precision(theta0, theta1, data_mileage, data_price)
             elif nb == 7:
-                print_graph(theta0, theta1, data_mileage, data_price)
+                precision(theta0, theta1, data_mileage, data_price)
             elif nb == 8:
+                print_graph(theta0, theta1, data_mileage, data_price, False)
+            elif nb == 9:
+                print_graph(theta0, theta1, data_mileage, data_price, True)
+            elif nb == 10:
                 break
             else:
                 print("\nInvalid number 🚫")
